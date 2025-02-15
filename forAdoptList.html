@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>List of Pets</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .pet-image {
+            max-width: 100px;
+            max-height: 100px;
+        }
+        .action-buttons button {
+            padding: 5px 10px;
+            margin-right: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            color: white;
+        }
+        .approve-button {
+            background-color: #4CAF50; /* Green */
+        }
+        .approve-button:hover {
+            background-color: #45a049;
+        }
+        .reject-button {
+            background-color: #f44336; /* Red */
+        }
+        .reject-button:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <h1>List of Pets</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Breed</th>
+                <th>Gender</th>
+                <th>Place</th>
+                <th>Category</th>
+                <th>Images</th>
+                <th>Username</th>
+                <th>emailId</th>
+                <th>Actions</th> <!-- New column for buttons -->
+            </tr>
+        </thead>
+        <tbody id="petList">
+            <!-- Pet data will be populated here -->
+        </tbody>
+    </table>
+    <script>
+        // Function to handle reject action
+        function rejectPet(petId) {
+            console.log('Rejecting pet with ID:', petId);
+            fetch(`http://localhost:4000/pet/${petId}/reject`, {
+                method: "PUT"
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                    // Reload the page after a delay
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000); // Reload after 2 seconds (2000 milliseconds)
+                } else {
+                    alert("Failed to update pet status.");
+                }
+            })
+            .catch(error => {
+                console.error("Error updating pet status:", error);
+                alert("An error occurred while updating pet status.");
+            });
+        }
+        
+        // Function to handle approve action
+        function approvePet(petId) {
+        console.log('Approving pet with ID:', petId);
+
+        // Fetch the pet details from the backend
+        fetch(`http://localhost:4000/pets/${petId}`) // Updated URL
+            .then(response => response.json())
+            .then(data => {
+                // Send the pet details to the backend route for approval and saving
+                fetch(`http://localhost:4000/pet/${petId}/approve`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data) // Send the pet details in the request body
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        alert(data.message);
+                        setTimeout(() => {
+                        location.reload();
+                    }, 1000); 
+                        // Optionally, refresh the page or update the UI as needed
+                    } else {
+                        alert("Failed to approve and save pet.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error approving and saving pet:", error);
+                    alert("An error occurred while approving and saving pet.");
+                });
+            })
+            .catch(error => console.error('Error fetching pet details:', error));
+    }
+        // Fetch pet data from the backend route
+        fetch('http://localhost:4000/pets')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Received data:', data); // Log the received data
+                
+                // Check if pets are available
+                if (data.count > 0) {
+                    // Iterate over each pet and populate the table
+                    data.pets.forEach(pet => {
+                        console.log('Pet ID:', pet._id); // Log the _id of each pet
+                        const petRow = `
+                            <tr>
+                                <td>${pet.name}</td>
+                                <td>${pet.age}</td>
+                                <td>${pet.breed}</td>
+                                <td>${pet.gender}</td>
+                                <td>${pet.place}</td>
+                                <td>${pet.category}</td>
+                                
+                                <td>
+                                    ${pet.images && Array.isArray(pet.images) ? pet.images.map(image => `<img src="data:${image.contentType};base64,${image.data}" alt="Pet Image" class="pet-image">`).join('') : 'No images'}
+                                </td>
+                                <td>${pet.username}</td>
+                                <td>${pet.emailId}</td>
+                                <td class="action-buttons">
+                                    <button class="approve-button" onclick="approvePet('${pet._id}')">Approve</button>
+                                    <button class="reject-button" onclick="rejectPet('${pet._id}')">Reject</button>
+                                </td>
+                            </tr>
+                        `;
+                        document.getElementById('petList').innerHTML += petRow;
+                    });
+                } else {
+                    // Display message if no pets are available
+                    document.getElementById('petList').innerHTML = '<tr><td colspan="8">No pets found</td></tr>';
+                }
+            })
+            .catch(error => console.error('Error fetching pets:', error));
+    </script>
+    
+</body>
+</html>

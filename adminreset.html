@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Reset</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-image: url('bglogin.jpg'); /* Replace 'background.jpg' with your actual background image */
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        .container {
+            background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3); /* Box shadow for card effect */
+        }
+        
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        form {
+            width: 300px; /* Adjust as needed */
+            margin: 0 auto; /* Center the form */
+        }
+        
+        input[type="email"],
+        input[type="text"],
+        input[type="password"],
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        
+        input[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Password Reset</h2>
+        <form id="resetForm">
+            <input type="email" id="email" name="email" placeholder="Enter your email" required><br>
+            <input type="text" id="otp" name="otp" placeholder="Enter OTP" required><br>
+            <input type="password" id="newPassword" name="newPassword" placeholder="Enter new password" required><br>
+            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm new password" required><br>
+            <input type="submit" value="Reset Password">
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('resetForm').addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent the default form submission
+
+                // Get form data
+                const formData = new FormData(this);
+
+                // Convert FormData to object and stringify it
+                const jsonData = JSON.stringify(Object.fromEntries(formData));
+
+                // Log form data for debugging
+                console.log('Form Data:', jsonData);
+
+                // Send a POST request to the server with form data
+                fetch('http://localhost:4000/admin/reset-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json' // Set content type to JSON
+                    },
+                    body: jsonData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        alert(data.message); // Show success message
+                        // Redirect to a success page or perform any other action
+                    } else if (data.error) {
+                        alert(data.error); // Show error message
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.'); // Show generic error message
+                });
+            });
+        });
+    </script>
+</body>
+</html>

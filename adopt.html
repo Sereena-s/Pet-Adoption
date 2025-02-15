@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adopt a Pet</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      /* background: linear-gradient(45deg, #7a7574, #78b9e4, #2c66a0, #3d559e); */
+      /* background-size: 400% 400%; */
+      background-image: url(adoptfrm1.jpg);
+      background-size: cover;
+      background-repeat: no-repeat;
+     /* animation: gradientBG 15s ease infinite; */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    @keyframes gradientBG {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .container {
+      max-width: 400px;
+      background-color: rgba(167, 164, 164, 0.3);
+      backdrop-filter: blur(20px);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 20px  rgba(5, 0, 0, 0.1);
+      animation: fadeIn 1s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+     font-family:'Times New Roman', Times, serif
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #555;
+    }
+
+    input[type="text"],
+    input[type="email"] {
+      width: calc(100% - 20px);
+      padding: 10px;
+      margin-bottom: 20px;
+      border:1px solid rgba(12, 12, 12, 0.5);
+      border-radius: 20px;
+      background-color: rgba(255, 255, 255, 0.5); 
+      animation: slideIn 0.5s ease forwards;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus {
+      outline: none;
+      box-shadow: 0 0 5px #9ecaed;
+    }
+
+    button {
+      background: linear-gradient(to right, #8ae6ea, #1a79cd);
+      transition-duration: 0.4s;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+      /* transition: background 0.3s ease; */
+      animation: slideIn 0.5s ease forwards;
+    }
+
+    button:hover {
+      background: linear-gradient(to right, #2762d8,#a1d6eb);
+    }
+
+    #message {
+      margin-top: 20px;
+      text-align: center;
+      color: #555;
+    }
+
+    .success-message {
+      color: #4CAF50;
+    }
+
+    .error-message {
+      color: red;
+    }
+
+    .register-link {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: #333;
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.3s ease;
+      animation: slideIn 0.5s ease forwards;
+    }
+
+    .register-link:hover {
+      color: #03f50b;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  
+  <h2>Adopt a Pet</h2>
+<form id="adoptionForm">
+    <label for="userName">Your Name:</label>
+    <input type="text" id="userName" name="userName" placeholder="Enter your name" required>
+    
+    <label for="emailId">Your Email:</label>
+    <input type="email" id="emailId" name="emailId" placeholder="Enter your email" required>
+    
+    <label for="petName">Pet Name:</label>
+    <input type="text" id="petName" name="petName" placeholder="Enter pet's name" required>
+    
+    <label for="petId">Pet ID:</label>
+    <input type="text" id="petId" name="petId" placeholder="Enter pet's ID" required>
+    
+    <button type="button" onclick="adoptPet()">Adopt a Pet</button>
+</form>
+
+  <div id="message"></div>
+
+  <a href="userreg.html" class="register-link">Don't have an account? Register here.</a>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const petId = urlParams.get('id');
+      const petName = urlParams.get('name');
+
+      if (petId && petName) {
+          document.getElementById('petName').value = decodeURIComponent(petName);
+          document.getElementById('petId').value = petId;
+      }
+  });
+
+  async function adoptPet() {
+      const userName = document.getElementById("userName").value;
+      const emailId = document.getElementById("emailId").value;
+      const petName = document.getElementById("petName").value;
+      const petId = document.getElementById("petId").value;
+
+      try {
+          // Check if the user exists
+          const userCheckResponse = await fetch("http://localhost:4000/user/check", {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ emailId: emailId })
+          });
+
+          const userData = await userCheckResponse.json();
+
+          if (!userData.status) {
+              // User does not exist, prompt to register
+              const registerConfirm = confirm("User not found. Do you want to register?");
+              if (registerConfirm) {
+                  // Redirect to registration page
+                  window.location.href = "userreg.html";
+              } else {
+                  // User chose not to register
+                  alert("Please register to adopt a pet.");
+              }
+              return;
+          }
+
+          // User exists, proceed with pet adoption
+          const response = await fetch("http://localhost:4000/adopt/pet", {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ name: userName, emailId: emailId, petName: petName, petId: petId })
+          });
+
+          const data = await response.json();
+
+          if (data.status) {
+              document.getElementById("message").innerHTML = `<p class="success-message">Pet adopted successfully.</p><p>Pet Name: ${data.pet.name}</p>`;
+              setTimeout(function() {
+              window.location.href = "home.html";
+               }, 1200);
+          } else {
+              document.getElementById("message").innerHTML = `<p class="error-message">Error: ${data.msg}</p>`;
+          }
+      } catch (error) {
+          console.error("Error:", error);
+          document.getElementById("message").innerHTML = `<p class="error-message">Error: ${error.message}</p>`;
+      }
+  }
+</script>
+
+
+
+</body>
+</html>

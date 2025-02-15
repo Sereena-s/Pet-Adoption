@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Success Stories</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: rgb(184, 219, 231);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .detailsContainer {
+            width: 90%;
+            max-width: 700px;
+            margin: auto;
+            background-color: rgba(255, 255, 255, 0.4);
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            padding: 10px 20px 25px;
+        }
+
+        .input-field {
+            font-size: 15px;
+            background-color: rgba(4, 4, 4, 0.2);
+            color: black;
+            border: none;
+            height: 50px;
+            width: 100%;
+            border-radius: 30px;
+            padding: 0 20px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        .input-field-textarea {
+            font-size: 15px;
+            background-color: rgba(4, 4, 4, 0.2);
+            color: black;
+            border: none;
+            width: 100%;
+            border-radius: 30px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            height: 80px;
+            resize: none;
+            font-family: Arial, sans-serif;
+        }
+
+        .input-field-file {
+            font-size: 15px;
+            background-color: rgba(4, 4, 4, 0.2);
+            color: black;
+            border: none;
+            height: auto;
+            width: 100%;
+            border-radius: 30px;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        ::placeholder {
+            color: black;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        h2 {
+            color: #b86f16;
+        }
+
+        button {
+            background: rgba(191, 122, 203, 1);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background: rgba(165, 58, 184, 0.7);
+        }
+
+        #successStoryList {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .success-story {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .success-story-image {
+            display: flex;
+            width: 200px;
+            height: 200px;
+            margin-bottom: 40px;
+            margin-top: auto;
+        }
+
+        .imgContainer{
+            display: flex;
+            justify-content: center;
+            margin-top: auto;
+
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 15px;
+            margin-top: auto;
+            
+        }
+
+        .edit-button,
+        .delete-button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+           
+        }
+
+        .edit-button:hover,
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Manage Success Stories</h1>
+        <!-- Add Success Story Form -->
+        <div class="detailsContainer">
+            <h2>Add Success Story</h2>
+            <form id="addSuccessStoryForm" enctype="multipart/form-data">
+                <input type="text" id="title" name="title" class="input-field" placeholder="Title" required><br>
+                <textarea id="content" name="content" class="input-field-textarea" placeholder="Content" required></textarea><br>
+                <input type="text" id="author" name="author" class="input-field" placeholder="Author" required><br>
+                <input type="file" id="image" name="image" class="input-field-file" required><br>
+                <button type="button" onclick="submitSuccessStoryForm()">Submit</button>
+            </form>
+        </div><br><br>
+
+        <!-- Success Story List -->
+        <div class="detailsContainer">
+            <h2>Success Story List</h2>
+            <div id="successStoryList">
+                <!-- Success story list will be displayed here -->
+            </div>
+        </div><br><br><br>
+
+        <!-- Edit Success Story Form -->
+        <div class="detailsContainer">
+            <h2>Edit Success Story</h2>
+            <form id="editSuccessStoryForm" style="display: none;">
+                <label for="editStoryId">Story ID:</label>
+                <input type="text" id="editStoryId" name="id" class="input-field" required><br>
+                <label for="editTitle">Title:</label>
+                <input type="text" id="editTitle" name="title" class="input-field" required><br>
+                <label for="editContent">Content:</label>
+                <textarea id="editContent" name="content" class="input-field-textarea" required></textarea><br>
+                <label for="editAuthor">Author:</label>
+                <input type="text" id="editAuthor" name="author" class="input-field" required><br>
+                <label for="editImage">Image:</label>
+                <input type="file" id="editImage" name="image" class="input-field-file"><br>
+                <button type="button" onclick="submitEditForm()">Save Changes</button>
+                <button type="button" onclick="cancelEditForm()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Function to fetch and display the list of success stories
+        function fetchSuccessStoryList() {
+            $.get('http://localhost:4000/success/list', function (successStories) {
+                // Clear existing list
+                $('#successStoryList').empty();
+                // Append each success story to the list
+                successStories.stories.forEach(function (story) {
+                    $('#successStoryList').append(`
+                        <div class="success-story">
+                            <h3>${story.title}</h3>
+                            <div class="petContainer">
+                                <p>${story.content}</p>
+                                <p>Author: ${story.author}</p>
+                                <p>Story ID: ${story.storyId}</p>
+                            </div>
+                            <div class="imgContainer">
+                            <img src="${story.image}" alt="${story.title}" class="success-story-image">
+                            </div>
+                            <div class="button-container">
+                                <button class="edit-button" onclick="editSuccessStory('${story.storyId}')">Edit</button>
+                                <button class="delete-button" onclick="deleteSuccessStory('${story.storyId}')">Delete</button>
+                            </div>
+                        </div>
+                    `);
+                });
+            }).fail(function (xhr, status, error) {
+                console.error('Error fetching success stories:', error); // Log any errors
+            });
+        }
+
+        // Fetch the success story list when the page loads
+        $(document).ready(function () {
+            fetchSuccessStoryList();
+        });
+
+        // Function to submit the form for adding a new success story
+        function submitSuccessStoryForm() {
+            var formData = new FormData(document.getElementById('addSuccessStoryForm'));
+            $.ajax({
+                url: 'http://localhost:4000/success/add',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    alert('Success story added successfully');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 500);
+                    fetchSuccessStoryList(); // Refresh the success story list
+                },
+                error: function (xhr, status, error) {
+                    alert('Error: ' + error);
+                }
+            });
+        }
+
+        // Function to edit a success story
+        function editSuccessStory(storyId) {
+            $('#editStoryId').val(storyId); // Fill the edit form with the story ID
+            $('#editSuccessStoryForm').show(); // Show the edit form
+        }
+
+        // Function to submit the form for editing a success story
+        function submitEditForm() {
+            var formData = new FormData(document.getElementById('editSuccessStoryForm'));
+            $.ajax({
+                url: 'http://localhost:4000/success/edit',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    alert('Success story updated successfully');
+                    fetchSuccessStoryList();
+                    setTimeout(() => {
+                        location.reload();
+                    }, 500); // Refresh the success story list
+                    $('#editSuccessStoryForm').hide(); // Hide the edit form after successful submission
+                },
+                error: function (xhr, status, error) {
+                    alert('Error: ' + error);
+                }
+            });
+        }
+
+        // Function to cancel editing and hide the edit form
+        function cancelEditForm() {
+            $('#editSuccessStoryForm').hide();
+        }
+
+        // Function to delete a success story
+        function deleteSuccessStory(storyId) {
+            if (confirm('Are you sure you want to delete this success story?')) {
+                $.ajax({
+                    url: 'http://localhost:4000/success/delete',
+                    type: 'POST',
+                    data: { id: storyId },
+                    success: function (response) {
+                        alert('Success story deleted successfully');
+                        fetchSuccessStoryList(); // Refresh the success story list
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Error: ' + error);
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>
